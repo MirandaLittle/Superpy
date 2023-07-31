@@ -8,6 +8,9 @@ from rich.table import Table
 import xlsxwriter
 
 
+parser = argparse.ArgumentParser(description='Welcome to the inventory')
+args = parser.parse_args()
+
 def last_bought():
     with open('bought.csv', 'r', newline='') as file:
         reader = csv.DictReader(file)
@@ -317,6 +320,7 @@ def report_inventory_excel():
             for c, col in enumerate(row):
                 worksheet.write(r, c, col)
     workbook.close()
+
 
 def report_sold_excel():
     workbook = xlsxwriter.Workbook('sold.xlsx')
