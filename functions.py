@@ -115,9 +115,9 @@ def advance_time(days):
     print('OK')      
 
 
-def report_inventory():
+def report_inventory(now, yesterday):
     console = Console() 
-    if args.now is not None:
+    if now is not None:
         with open('bought.csv', 'r', newline='') as boughtfile:
             reader = csv.DictReader(boughtfile)
             table = Table(show_header=True, header_style='light_sea_green', title='Inventory Report Now', title_style='magenta', show_lines=True)
@@ -129,7 +129,7 @@ def report_inventory():
                 table.add_row(row['product_name'], row['amount'], row['buy_price'], row['expiration_date'])
         console.print(table)
            
-    if args.yesterday is not None: 
+    if yesterday is not None: 
         with open('bought.csv', 'r', newline='') as boughtfile:
             reader = csv.DictReader(boughtfile)
             table = Table(show_header=True, header_style="light_sea_green", title="Inventory Report Yesterday", title_style="magenta", show_lines=True)
@@ -145,9 +145,9 @@ def report_inventory():
         console.print(table)  
 
 
-def report_sold_and_expired():
+def report_sold_and_expired(today, yesterday):
     console = Console()
-    if args.today is not None:
+    if today is not None:
         with open('sold.csv', 'r', newline='') as soldfile: 
             reader = csv.DictReader(soldfile)
             table = Table(show_header=True, header_style="light_sea_green", title="Sold and Expired Report Today", title_style="magenta", show_lines=True)
@@ -170,7 +170,7 @@ def report_sold_and_expired():
                     table.add_row(row['product_name'], row['amount'], '0', 'yes')
         console.print(table)
 
-    if args.yesterday is not None:
+    if yesterday is not None:
         with open('sold.csv', 'r', newline='') as soldfile: 
             reader = csv.DictReader(soldfile)
             table = Table(show_header=True, header_style="light_sea_green", title="Sold and Expired Report Yesterday", title_style="magenta", show_lines=True)
@@ -194,8 +194,8 @@ def report_sold_and_expired():
         console.print(table)
     
 
-def report_revenue():
-    if args.today is not None:
+def report_revenue(today, yesterday, date):
+    if today is not None:
         with open('sold.csv', 'r', newline='') as soldfile:
             reader = csv.DictReader(soldfile)
             sell_price_list = []
@@ -206,7 +206,7 @@ def report_revenue():
                     sell_price_list.append(float(row['sell_price'])*int(row['amount']))
             revenue = sum(sell_price_list)
         print(f"Today's revenue so far: {revenue} euro's.")
-    if args.yesterday is not None:
+    if yesterday is not None:
         with open('sold.csv', 'r', newline='') as soldfile:
             reader = csv.DictReader(soldfile)
             sell_price_list = []
@@ -217,15 +217,15 @@ def report_revenue():
                     sell_price_list.append(float(row['sell_price'])*int(row['amount']))
             revenue = sum(sell_price_list)
         print(f"Yesterday's revenue: {revenue} euro's.")
-    if args.date is not None:
+    if date is not None:
         with open('sold.csv', 'r', newline='') as soldfile:
             reader = csv.DictReader(soldfile)
             sell_price_list = []
-            input_date_month = int(args.date[5:7])
-            input_date_year = int(args.date[0:4])
-            input_date_string = f'{args.date[5:7]}/{args.date[2:4]}'
+            input_date_month = int(date[5:7])
+            input_date_year = int(date[0:4])
+            input_date_string = f'{date[5:7]}/{date[2:4]}'
             if input_date_month < 10:
-                input_date_month = int(args.date[6:7])
+                input_date_month = int(date[6:7])
             months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
             for row in reader:
                 sell_date_string = f'{row["sell_date"][8:10]}/{row["sell_date"][5:7]}/{row["sell_date"][2:4]}'
@@ -235,8 +235,8 @@ def report_revenue():
         print(f"Revenue from {months[input_date_month - 1]} {input_date_year}: {revenue} euro's.")
 
 
-def report_profit():
-    if args.today is not None:
+def report_profit(today, yesterday, date):
+    if today is not None:
         with open('sold.csv', 'r', newline='') as soldfile:
             reader = csv.DictReader(soldfile)
             sell_price_list = []
@@ -259,7 +259,7 @@ def report_profit():
         print(f"Today's profit: {profit} euro's")
 
 
-    if args.yesterday is not None:
+    if yesterday is not None:
         with open('sold.csv', 'r', newline='') as soldfile:
             reader = csv.DictReader(soldfile)
             sell_price_list = []
@@ -281,17 +281,17 @@ def report_profit():
         profit = revenue - total_expenses
         print(f"Yesterday's profit: {profit} euro's")
 
-    if args.date is not None:
+    if date is not None:
         with open('sold.csv', 'r', newline='') as soldfile:
             reader = csv.DictReader(soldfile)
             sell_price_list = []
             expenses_bought = []
             expenses_sold = []
-            input_date_month = int(args.date[5:7])
-            input_date_year = int(args.date[0:4])
-            input_date_string = f'{args.date[5:7]}/{args.date[2:4]}'
+            input_date_month = int(date[5:7])
+            input_date_year = int(date[0:4])
+            input_date_string = f'{date[5:7]}/{date[2:4]}'
             if input_date_month < 10:
-                input_date_month = int(args.date[6:7])
+                input_date_month = int(date[6:7])
             months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
             for row in reader:
                 sell_date_string = f'{row["sell_date"][8:10]}/{row["sell_date"][5:7]}/{row["sell_date"][2:4]}'
