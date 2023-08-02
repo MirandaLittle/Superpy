@@ -23,11 +23,11 @@ The date text file is opened again and the old date is overwritten by the new da
 To get  the total revenue or profit for a particular month, slicing is used to get the products that have a sell date that corresponds to the month and year that the user input. To get the revenue, the following code was used:
 ```python
 sell_price_list = []
-input_date_month = int(args.date[5:7])
-input_date_year = int(args.date[0:4])
-input_date_string = f'{args.date[5:7]}/{args.date[2:4]}'
+input_date_month = int(date[5:7])
+input_date_year = int(date[0:4])
+input_date_string = f'{date[5:7]}/{date[2:4]}'
 if input_date_month < 10:
-    input_date_month = int(args.date[6:7])
+    input_date_month = int(date[6:7])
 months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
 for row in reader:
     sell_date_string = f'{row["sell_date"][8:10]}/{row["sell_date"][5:7]}/{row["sell_date"][2:4]}'
