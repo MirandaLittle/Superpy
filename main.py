@@ -1,13 +1,6 @@
 # Imports
 import functions
 import argparse
-# import csv
-# from datetime import datetime
-# from datetime import timedelta
-# import os.path
-# from rich.console import Console
-# from rich.table import Table
-# import xlsxwriter
 
 
 # Do not change these lines.
@@ -53,11 +46,9 @@ def main():
     report_profit_parser.add_argument('--date', type=str, help='input a date in format YYYY-MM')
 
     report_inventory_excel_parser = subparsers.add_parser('report_inventory_excel', help='export a report of the current inventory to an excel file (.xlsx)')
-    report_inventory_excel_parser.add_argument('report_inventory_excel', help='export a report of the current inventory to an excel file (.xlsx)')
     
     report_sold_excel_parser = subparsers.add_parser('report_sold_excel', help='export a report of sold items to an excel file (.xlsx)')
-    report_sold_excel_parser.add_argument('report_sold_excel', help='export a report of sold items to an excel file (.xlsx)')
-    
+        
     args = parser.parse_args()
 
     if args.command == 'buy':
@@ -73,13 +64,13 @@ def main():
         functions.report_inventory(now=args.now, yesterday=args.yesterday)
 
     if args.command == 'report_sold':
-        functions.report_sold_and_expired()
+        functions.report_sold_and_expired(today=args.today, yesterday=args.yesterday)
 
     if args.command == 'report_revenue':
-        functions.report_revenue()
+        functions.report_revenue(today=args.today, yesterday=args.yesterday, date=args.date)
 
     if args.command == 'report_profit':
-        functions.report_profit()
+        functions.report_profit(today=args.today, yesterday=args.yesterday, date=args.date)
 
     if args.command == 'report_inventory_excel':
         functions.report_inventory_excel()
