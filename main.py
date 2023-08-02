@@ -53,9 +53,11 @@ def main():
     report_profit_parser.add_argument('--date', type=str, help='input a date in format YYYY-MM')
 
     report_inventory_excel_parser = subparsers.add_parser('report_inventory_excel', help='export a report of the current inventory to an excel file (.xlsx)')
-
+    report_inventory_excel_parser.add_argument('report_inventory_excel', help='export a report of the current inventory to an excel file (.xlsx)')
+    
     report_sold_excel_parser = subparsers.add_parser('report_sold_excel', help='export a report of sold items to an excel file (.xlsx)')
-
+    report_sold_excel_parser.add_argument('report_sold_excel', help='export a report of sold items to an excel file (.xlsx)')
+    
     args = parser.parse_args()
 
     if args.command == 'buy':
@@ -68,7 +70,7 @@ def main():
         functions.advance_time(args.days)
 
     if args.command == 'report_inventory':
-        functions.report_inventory()
+        functions.report_inventory(now=args.now, yesterday=args.yesterday)
 
     if args.command == 'report_sold':
         functions.report_sold_and_expired()
