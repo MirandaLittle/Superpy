@@ -1,4 +1,3 @@
-import argparse
 import csv
 from datetime import datetime
 from datetime import timedelta
@@ -6,10 +5,8 @@ import os.path
 from rich.console import Console
 from rich.table import Table
 import xlsxwriter
+from main import *
 
-
-parser = argparse.ArgumentParser(description='Welcome to the inventory')
-args = parser.parse_args()
 
 def last_bought():
     with open('bought.csv', 'r', newline='') as file:
