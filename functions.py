@@ -29,15 +29,24 @@ def buy_product(product_name, buy_price, expiration_date, amount):
     file_exists_csv = os.path.exists('bought.csv')
     fieldnames = ['id', 'product_name', 'buy_price', 'buy_date', 'expiration_date', 'amount']
     buy_date = todays_date()
+    expiration_date_string = f'{expiration_date[8:10]}/{expiration_date[5:7]}/{expiration_date[2:4]}'
+    expiration_date_object = datetime.strptime(expiration_date_string, '%d/%m/%y').date()
     with open('bought.csv', 'a', newline='') as csvfile:
+        sys.tracebacklimit = 0
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames, delimiter=',')
-        if file_exists_csv == False:
-            writer.writeheader()
-            id = 1
-        else:
-            id = int(last_bought()['id']) + 1
-        writer.writerow({'id': id, 'product_name': product_name, 'buy_price': buy_price, 'buy_date': buy_date, 'expiration_date': expiration_date, 'amount': amount,})
-   
+        class ExpirationError(Exception):
+            pass
+
+        if expiration_date_object > todays_date():
+            if file_exists_csv == False:
+                writer.writeheader()
+                id = 1
+            else:
+                id = int(last_bought()['id']) + 1
+            writer.writerow({'id': id, 'product_name': product_name, 'buy_price': buy_price, 'buy_date': buy_date, 'expiration_date': expiration_date, 'amount': amount,})
+        if expiration_date_object <= todays_date():
+            raise ExpirationError("product expired")
+
 
 def last_sold():
     """
@@ -76,12 +85,12 @@ def sell_product(product_name, sell_price, amount):
         for row in reader:
             product_list.append(row['product_name'])
             expiration_date_string = f'{row["expiration_date"][8:10]}/{row["expiration_date"][5:7]}/{row["expiration_date"][2:4]}'
-            expiration_date = datetime.strptime(expiration_date_string, '%d/%m/%y').date()
+            expiration_date_object = datetime.strptime(expiration_date_string, '%d/%m/%y').date()
         if product_name not in product_list:
             raise ProductError("product not in stock")
         if product_name == row['product_name'] and amount > int(row['amount']):
             raise AmountError("not enough in stock")
-        if product_name == row['product_name'] and expiration_date < todays_date():
+        if product_name == row['product_name'] and expiration_date_object <= todays_date():
             raise ExpirationError("product expired")
 
                 
@@ -108,8 +117,8 @@ def sell_product(product_name, sell_price, amount):
         rows = []
         for row in reader:
             expiration_date_string = f'{row["expiration_date"][8:10]}/{row["expiration_date"][5:7]}/{row["expiration_date"][2:4]}'
-            expiration_date = datetime.strptime(expiration_date_string, '%d/%m/%y').date()
-            if row['product_name'] == product_name and expiration_date > todays_date():
+            expiration_date_object = datetime.strptime(expiration_date_string, '%d/%m/%y').date()
+            if row['product_name'] == product_name and expiration_date_object > todays_date():
                 row['amount'] = int(row['amount']) - amount
                 if int(row['amount']) > 0:
                     rows.append(row)
