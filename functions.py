@@ -6,9 +6,14 @@ from rich.console import Console
 from rich.table import Table
 import xlsxwriter
 from main import *
+import sys
 
+# Buy and sell items
 
 def last_bought():
+    """
+    Gives the ID number of the last bought item
+    """
     with open('bought.csv', 'r', newline='') as file:
         reader = csv.DictReader(file)
         bought_list = []
@@ -18,6 +23,9 @@ def last_bought():
 
 
 def buy_product(product_name, buy_price, expiration_date, amount):
+    """
+    Writes a bought item from the user input into a csv file called bought.csv
+    """
     file_exists_csv = os.path.exists('bought.csv')
     fieldnames = ['id', 'product_name', 'buy_price', 'buy_date', 'expiration_date', 'amount']
     buy_date = todays_date()
@@ -32,6 +40,9 @@ def buy_product(product_name, buy_price, expiration_date, amount):
    
 
 def last_sold():
+    """
+    Gives the ID number of the last sold item
+    """
     with open('sold.csv', 'r', newline='') as file:
         reader = csv.DictReader(file)
         sold_list = []
@@ -40,6 +51,9 @@ def last_sold():
     return sold_list[len(sold_list) - 1]       
 
 def sell_product(product_name, sell_price, amount):
+    """
+    Writes a sold item from the user input into a csv file called sold.csv
+    """
     file_exists = os.path.exists('sold.csv')
     fieldnames_sell = ['id', 'bought_id', 'product_name', 'buy_price', 'sell_price', 'sell_date', 'amount']
     fieldnames_buy = ['id', 'product_name', 'buy_price', 'buy_date', 'expiration_date', 'amount']
@@ -48,6 +62,7 @@ def sell_product(product_name, sell_price, amount):
     sell_date = todays_date()
 
     with open('bought.csv', 'r+', newline='') as boughtfile:
+        sys.tracebacklimit = 0
         reader = csv.DictReader(boughtfile)
         product_list = []
 
@@ -55,13 +70,19 @@ def sell_product(product_name, sell_price, amount):
             pass
         class AmountError(Exception):
             pass
+        class ExpirationError(Exception):
+            pass
 
         for row in reader:
             product_list.append(row['product_name'])
+            expiration_date_string = f'{row["expiration_date"][8:10]}/{row["expiration_date"][5:7]}/{row["expiration_date"][2:4]}'
+            expiration_date = datetime.strptime(expiration_date_string, '%d/%m/%y').date()
         if product_name not in product_list:
             raise ProductError("product not in stock")
         if product_name == row['product_name'] and amount > int(row['amount']):
             raise AmountError("not enough in stock")
+        if product_name == row['product_name'] and expiration_date < todays_date():
+            raise ExpirationError("product expired")
 
                 
     with open('bought.csv', 'r+', newline='') as boughtfile:
@@ -86,11 +107,14 @@ def sell_product(product_name, sell_price, amount):
         reader = csv.DictReader(boughtfile)
         rows = []
         for row in reader:
-            if row['product_name'] == product_name:
+            expiration_date_string = f'{row["expiration_date"][8:10]}/{row["expiration_date"][5:7]}/{row["expiration_date"][2:4]}'
+            expiration_date = datetime.strptime(expiration_date_string, '%d/%m/%y').date()
+            if row['product_name'] == product_name and expiration_date > todays_date():
                 row['amount'] = int(row['amount']) - amount
                 if int(row['amount']) > 0:
                     rows.append(row)
-            else:
+                    break
+            else:        
                 rows.append(row)
 
     with open('bought.csv', 'w', newline='') as boughtfile:
@@ -98,8 +122,12 @@ def sell_product(product_name, sell_price, amount):
         writer.writeheader()
         writer.writerows(rows)
        
+# Date
 
 def todays_date():
+    """
+    Reads the date provided in the date.txt file and returns a datetime object with that date
+    """
     with open('date.txt', 'r', newline='') as file:
         string = file.read()
         todays_date = datetime.strptime(string, '%d/%m/%y').date()
@@ -107,6 +135,9 @@ def todays_date():
     
 
 def advance_time(days):
+    """
+    Advances the date with a number of days given by the user
+    """
     date = todays_date()
     new_date = date + timedelta(days=days)
     string = new_date.strftime('%d/%m/%y')
@@ -114,8 +145,12 @@ def advance_time(days):
         file.write(string)
     print('OK')      
 
+# Reports
 
 def report_inventory(now, yesterday):
+    """
+    Gives a report of the current or yesterday's inventory in the form of a table
+    """
     console = Console() 
     if now is not None:
         with open('bought.csv', 'r', newline='') as boughtfile:
@@ -146,6 +181,9 @@ def report_inventory(now, yesterday):
 
 
 def report_sold_and_expired(today, yesterday):
+    """
+    Gives a report of the sold and expired items in the form of a table
+    """
     console = Console()
     if today is not None:
         with open('sold.csv', 'r', newline='') as soldfile: 
@@ -195,6 +233,9 @@ def report_sold_and_expired(today, yesterday):
     
 
 def report_revenue(today, yesterday, date):
+    """
+    Gives a report of the revenue for today, yesterday or a specified month by the user
+    """
     if today is not None:
         with open('sold.csv', 'r', newline='') as soldfile:
             reader = csv.DictReader(soldfile)
@@ -236,6 +277,9 @@ def report_revenue(today, yesterday, date):
 
 
 def report_profit(today, yesterday, date):
+    """
+    Gives a report of the profit for today, yesterday or a specified month by the user
+    """
     if today is not None:
         with open('sold.csv', 'r', newline='') as soldfile:
             reader = csv.DictReader(soldfile)
@@ -309,6 +353,9 @@ def report_profit(today, yesterday, date):
 
 
 def report_inventory_excel():
+    """
+    Gives a report of the inventory in an excel file with the data from bought.csv
+    """
     workbook = xlsxwriter.Workbook('bought.xlsx')
     worksheet = workbook.add_worksheet()
     with open('bought.csv', 'rt', encoding='utf8') as f:
@@ -317,9 +364,13 @@ def report_inventory_excel():
             for c, col in enumerate(row):
                 worksheet.write(r, c, col)
     workbook.close()
+    print(f"Excel report created")
 
 
 def report_sold_excel():
+    """
+    Gives a report of the sold items in an excel file with the data from sold.csv
+    """
     workbook = xlsxwriter.Workbook('sold.xlsx')
     worksheet = workbook.add_worksheet()
     with open('sold.csv', 'rt', encoding='utf8') as f:
@@ -328,3 +379,4 @@ def report_sold_excel():
             for c, col in enumerate(row):
                 worksheet.write(r, c, col)
     workbook.close()
+    print(f"Excel report created")
