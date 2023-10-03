@@ -115,14 +115,15 @@ def sell_product(product_name, sell_price, amount):
     with open('bought.csv', 'r+', newline='') as boughtfile:
         reader = csv.DictReader(boughtfile)
         rows = []
+        product_found = False
         for row in reader:
             expiration_date_string = f'{row["expiration_date"][8:10]}/{row["expiration_date"][5:7]}/{row["expiration_date"][2:4]}'
             expiration_date_object = datetime.strptime(expiration_date_string, '%d/%m/%y').date()
-            if row['product_name'] == product_name and expiration_date_object > todays_date():
+            if row['product_name'] == product_name and expiration_date_object > todays_date() and not product_found:
                 row['amount'] = int(row['amount']) - amount
                 if int(row['amount']) > 0:
                     rows.append(row)
-                    break
+                    product_found = True
             else:        
                 rows.append(row)
 
